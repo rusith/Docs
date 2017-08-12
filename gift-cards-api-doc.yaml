@@ -1,0 +1,125 @@
+swagger: "2.0"
+info:
+  description: "API Documentation for Gift Cards Bay"
+  version: "1.0.0"
+  title: "Gift Cards Bay API"
+  contact:
+    email: "rusith@bourketechnologies.com"
+host: "api.giftcardsbay.com"
+tags:
+- name: "giftcards"
+  description: "Everything about gift cards"
+- name: "social"
+  description: "Everything about comments, likes"
+- name: "notifications"
+  description: "Everything about notifications"
+paths:
+  /notifications:
+    get:
+      tags:
+      - "notifications"
+      summary: "Get notifications."
+      description: "This returns set of notifications"
+      operationId: "getNotifications"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "limit"
+        description: "Limit the number of notifications to be retrieved"
+        required: false
+        type: "integer"
+      - in: "query"
+        name: "skip"
+        description: "Skip certen number ang get the rest (uses limit if provided)"
+        required: false
+        type: "integer"
+      - in: "query"
+        name: "from(date)"
+        description: "Get notification added after this time"
+        required: false
+        type: "string"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/UserNotification"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /notifications/{id}/seen:
+    post:
+      tags:
+      - "notifications"
+      summary: "Mark a notification as seen"
+      description: "Marks the notification as seen "
+      operationId: "makeNotificationSeen"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "Id of the notification"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        404:
+          description: "A notification with the given id is not found"
+        201:
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/BasicResult"
+        500:
+          description: "Json message if something went wrong while processing the request"        
+definitions:
+  UserNotification:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int32"
+        description: "Id of the notification"
+      adddedDate:
+        type: "string"
+        description: "Time the notification was added to the system"
+      seen:
+        type: "boolean"
+        description: "Seen by the user"
+      notificationType:
+        type: "string"
+        description: "Type of the notification"
+        enum:
+        - "FAVCRD"
+        - "CMNTCD"
+        - "BIDCRD"
+        - "LKCMNT"
+        - "RPLCMT"
+        - "LKRPLY"
+      content:
+        type: "string"
+        description: "Content of the notification"
+      giftCard:
+        type: "integer"
+        format: "int32"
+        description: "Linked gift card"
+      innerLink: 
+        type: "integer"
+        format: "int32"
+        description: "Link to inner element of a gift card"
+  BasicResult:
+    type: "object"
+    properties:
+      success:
+        type: "boolean"
+        description: "Was the request successful or not"
