@@ -7,38 +7,116 @@ info:
     email: "rusith@bourketechnologies.com"
 host: "api.giftcardsbay.com"
 tags:
-- name: "giftcards"
-  description: "Everything about gift cards"
+- name: "authentication"
+  description: "Everything about authentication"
+- name: "giftcardCategory"
+  description: "Everything about giftcard categotries"
 - name: "social"
   description: "Everything about comments, likes"
+- name: "companies"
+  description: "Everything about companies"
+- name: "giftcards"
+  description: "Everything about gift cards"
 - name: "notifications"
   description: "Everything about notifications"
 paths:
-  /notifications:
+  /auth/users:
+    post:
+      tags:
+      - "authentication"
+      summary: "Register a new user."
+      description: "This return only status code"
+      operationId: "registerAUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "model"
+        description: "All details about the new user"
+        required: true
+        schema:
+          $ref: "#/definitions/UserModel"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/UserModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /auth/users/username/exists:
     get:
       tags:
-      - "notifications"
-      summary: "Get notifications."
-      description: "This returns set of notifications"
-      operationId: "getNotifications"
+      - "authentication"
+      summary: "Check username avalilablity"
+      description: "This return avalilable username count"
+      operationId: "checkUserAvailability"
       produces:
       - "application/json"
       parameters:
       - in: "query"
-        name: "limit"
-        description: "Limit the number of notifications to be retrieved"
-        required: false
-        type: "integer"
-      - in: "query"
-        name: "skip"
-        description: "Skip certen number ang get the rest (uses limit if provided)"
-        required: false
-        type: "integer"
-      - in: "query"
-        name: "from(date)"
-        description: "Get notification added after this time"
-        required: false
+        name: "username"
+        description: "The user name for login"
+        required: true
         type: "string"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "integer"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /auth/users/authenticate:
+    post:
+      tags:
+      - "authentication"
+      summary: "Authenticate the user by user credentials"
+      description: "Return authenticate boolean result"
+      operationId: "authenticateUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "model"
+        description: "The user credentials"
+        required: true
+        schema:
+            $ref: "#/definitions/UserLoginModel"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "boolean"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /categories/names:
+    get:
+      tags:
+      - "giftcardCategory"
+      summary: "Get all gift cards categories"
+      description: "Return array TextIdModels result"
+      operationId: "getAllGiftcardCategories"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "first"
+        description: "Categories limit number"
+        required: true
+        type: "integer"
       responses:
         400:
           description: "Bad request if the parameters are wrong"
@@ -49,7 +127,522 @@ paths:
           schema:
             type: "array"
             items:
-              $ref: "#/definitions/UserNotification"
+              $ref: "#/definitions/TextIdModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /comments:
+    get:
+      tags:
+      - "social"
+      summary: "Get comments for givn gift card id"
+      description: "Return array of CardCommentModel"
+      operationId: "getGiftCardComments"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "giftCard"
+        description: "gift card id"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/CardCommentModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /comments/{comment}/likes:
+    post:
+      tags:
+      - "social"
+      summary: "Put a like to a comment"
+      description: "This return boolean"
+      operationId: "putlikeTocomment"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "comment"
+        description: "Identify the comment which is use to like"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "boolean"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /comments/{comment}/ likes:
+    delete:
+      tags:
+      - "social"
+      summary: "Delete Comment Like"
+      description: "This return boolean"
+      operationId: "deleteCommentLike"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "comment"
+        description: "Identify the comment which is use to like"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "boolean"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /comments/{comment}:
+    delete:
+      tags:
+      - "social"
+      summary: "Delete Comment"
+      description: "This return boolean"
+      operationId: "deleteComment"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "comment"
+        description: "Identify the comment"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "boolean"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  / comments:
+    post:
+      tags:
+      - "social"
+      summary: "Add a Comment for gift card"
+      description: "This return boolean"
+      operationId: "addComment"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "comment"
+        description: "The user comment"
+        required: true
+        schema:
+            $ref: "#/definitions/CommentModel"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "boolean"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /comments /{comment}:
+    put:
+      tags:
+      - "social"
+      summary: "Edit the Comment"
+      description: "This return boolean"
+      operationId: "editComment"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "comment"
+        description: "Identify the comment"
+        required: true
+        type: "integer"
+      - in: "query"
+        name: "content"
+        description: "The user comment"
+        required: true
+        type: "string"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "boolean"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /companies/names:
+    get:
+      tags:
+      - "companies"
+      summary: "Get all Gift card company names"
+      description: "Return array TextIdModels result"
+      operationId: "getAllGiftcardcompanies"
+      produces:
+      - "application/json"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TextIdModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /managegiftcards/{giftCardId}/likes:
+    post:
+      tags:
+      - "giftcards"
+      summary: "Add a like to gift card."
+      description: "This return boolean"
+      operationId: "makeAlike"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "giftCardId"
+        description: "Identify the gift card which is use to like"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/BasicResult"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /managegiftcards/giftcards:
+    post:
+      tags:
+      - "giftcards"
+      summary: "Add a new gift card."
+      description: "This return boolean"
+      operationId: "makeAGiftCard"
+      produces:
+      - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "order placed for purchasing the pet"
+          required: true
+          schema:
+            $ref: "#/definitions/GiftCardModel"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/BasicResult"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /managegiftcards/giftcards/previews:
+    get:
+      tags:
+      - "giftcards"
+      summary: "Add a new gift card."
+      description: "This return boolean"
+      operationId: "getGiftCardPreviwes"
+      produces:
+      - "application/json"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/BasicCardDetailsModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /giftcards/details:
+    get:
+      tags:
+      - "giftcards"
+      summary: "Get a new gift card details."
+      description: "This return GiftCardDetailsModel object"
+      operationId: "getAGiftCardDetails"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "giftCardId"
+        description: "Id of the gift card"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/GiftCardDetailsModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /giftcards/{giftCard}/images:
+    get:
+      tags:
+      - "giftcards"
+      summary: "Get images of the given gift card"
+      description: "This return GiftCardDetailsModel object"
+      operationId: "getAGiftCardImages"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "giftCard"
+        description: "Id of the gift card"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TextIdModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /giftcards/previews:
+    get:
+      tags:
+      - "giftcards"
+      summary: "Get gift card previews with all filterings and skiping "
+      description: "This return BasicCardDetailsModel array"
+      operationId: "getGiftcardPreviews"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "skip"
+        in: "query"
+        description: "Skip count"
+        required: true
+        type: "integer"
+      - name: "take"
+        in: "query"
+        description: "take count"
+        required: true
+        type: "integer"
+      - name: "searchText"
+        in: "query"
+        description: "search Text"
+        required: true
+        type: "string"
+      - name: "priceFrom"
+        in: "query"
+        description: "From-price"
+        required: true
+        type: "number"
+      - name: "priceTo"
+        in: "query"
+        description: "To-price"
+        required: true
+        type: "number"
+      - name: "user"
+        in: "query"
+        description: "User id"
+        required: true
+        type: "integer"
+      - name: "category"
+        in: "query"
+        description: "Category id"
+        required: false
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/BasicCardDetailsModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /giftcards/previews/{giftCardIds} :
+    get:
+      tags:
+      - "giftcards"
+      summary: "Get gift card previews by giving id list"
+      description: "This return BasicCardDetailsModel array"
+      operationId: "getGiftcardPreviewsByids"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "giftCardIds"
+        in: "path"
+        description: "gift card id"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/BasicCardDetailsModel"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /images/giftcards/{container}{giftCardId}{fileName}{size} :
+    get:
+      tags:
+      - "giftcards"
+      summary: "Get gift card images"
+      description: "This return path of the gift card image container and size filtering"
+      operationId: "getGiftcardImages"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "giftCardId"
+        in: "path"
+        description: "Id of te gift card"
+        required: true
+        type: "integer"
+      - name: "container"
+        in: "path"
+        description: "Container"
+        required: true
+        type: "string"
+      - name: "fileName"
+        in: "path"
+        description: "name of the file"
+        required: true
+        type: "string"
+      - name: "size"
+        in: "path"
+        description: "Size of the image"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /images/users/{container}{userId}{size} :
+    get:
+      tags:
+      - "giftcards"
+      summary: "Get user image"
+      description: "This return path of the user image, container and size filtering"
+      operationId: "getUserImage"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "userId"
+        in: "path"
+        description: "Id of the user"
+        required: true
+        type: "integer"
+      - name: "container"
+        in: "path"
+        description: "Container"
+        required: true
+        type: "string"
+      - name: "size"
+        in: "path"
+        description: "Size of the image"
+        required: true
+        type: "string"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
+        500:
+          description: "Json message if something went wrong while processing the request"
+  /images/users/{letter}{size} :
+    get:
+      tags:
+      - "giftcards"
+      summary: "Get user default image"
+      description: "This return path of the user default image, container and size filtering"
+      operationId: "getUserDefaultImage"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "letter"
+        in: "path"
+        description: "Id of the user"
+        required: true
+        type: "string"
+      - name: "size"
+        in: "path"
+        description: "Size of the image"
+        required: true
+        type: "string"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        200:
+          description: "successful operation"
+          schema:
+            type: "string"
         500:
           description: "Json message if something went wrong while processing the request"
   /notifications/{id}/seen:
@@ -81,7 +674,38 @@ paths:
             items:
               $ref: "#/definitions/BasicResult"
         500:
-          description: "Json message if something went wrong while processing the request"        
+          description: "Json message if something went wrong while processing the request"    
+  /notifications/{id}/notified:
+    post:
+      tags:
+      - "notifications"
+      summary: "Mark a notification as notified"
+      description: "Marks the notification as notified "
+      operationId: "makeNotificationNotified"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "path"
+        name: "id"
+        description: "Id of the notification"
+        required: true
+        type: "integer"
+      responses:
+        400:
+          description: "Bad request if the parameters are wrong"
+        401:
+          description: "Unauthorized if not logged in"
+        404:
+          description: "A notification with the given id is not found"
+        201:
+          description: "successful operation"
+          schema:
+            type: "object"
+            items:
+              $ref: "#/definitions/BasicResult"
+        500:
+          description: "Json message if something went wrong while processing the request"    
+              
 definitions:
   UserNotification:
     type: "object"
@@ -123,3 +747,299 @@ definitions:
       success:
         type: "boolean"
         description: "Was the request successful or not"
+  GiftCardModel:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int32"
+        description: "Id of the gift card"
+      quantity:
+        type: "integer"
+        format: "int32"
+        description: "Quantity"
+      title: 
+        type: "string"
+        description: "Title"
+      description: 
+        type: "string"
+        description: "Description"
+      issuedCompany:
+        type: "integer"
+        format: "int32"
+        description: "Issued Company"
+      price: 
+        type: "number"
+        description: "Price"
+      owner: 
+        type: "integer"
+        format: "int32"
+        description: "Owner"
+      createdDate:
+        type: "string"
+        description: "Created Date"
+      modifiedDate:
+        type: "string"
+        description: "Giftcard Modified Date"
+      expireDate:
+        type: "string"
+        description: "Expire Date"
+      gUID:
+        type: "string"
+        description: "GUID"
+      directoryLocation:
+        type: "integer"
+        format: "int32"
+        description: "Directory Location"
+      status:
+        type: "integer"
+        format: "int32"
+        description: "Status"
+      category:
+        type: "integer"
+        format: "int32"
+        description: "Gift cart category"
+      images:
+        type: "array"
+        description: "Image list(3)"
+  BasicCardDetailsModel:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int32"
+        description: "Id of the gift card"
+      title: 
+        type: "string"
+        description: "Title"
+      createdDate:
+        type: "string"
+        description: "Created Date"
+      expireDate:
+        type: "string"
+        description: "Expire Date"
+      quantity:
+        type: "integer"
+        format: "int32"
+        description: "Quantity"
+      description: 
+        type: "string"
+        description: "Description"
+      issuedCompany:
+        type: "integer"
+        format: "int32"
+        description: "Issued Company"
+      price: 
+        type: "number"
+        description: "Price"
+      owner: 
+        type: "integer"
+        format: "int32"
+        description: "Owner"
+      modifiedDate:
+        type: "string"
+        description: "Giftcard Modified Date"
+      gUID:
+        type: "string"
+        description: "GUID"
+      directoryLocation:
+        type: "integer"
+        format: "int32"
+        description: "Directory Location"
+      status:
+        type: "integer"
+        format: "int32"
+        description: "Status"
+      category:
+        type: "integer"
+        format: "int32"
+        description: "Gift cart category"
+      images:
+        type: "array"
+        description: "Image list(3)"
+  UserModel:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int32"
+        description: "Id of the User"
+      username:
+        type: "string"
+        description: "user user name"
+      password:
+        type: "string"
+        description: "user password"
+      passwordSalt:
+        type: "string"
+        description: "password salt for cryptography"
+      firstName:
+        type: "string"
+        description: "user first name"
+      lastName:
+        type: "string"
+        description: "user last name"
+      homeTelephone:
+        type: "string"
+        description: "user home telephone number"
+      mobile:
+        type: "string"
+        description: "user mobile number"
+      createdDate:
+        type: "string"
+        description: "user created date"
+      modifiedDate:
+        type: "string"
+        description: "user last modified date"
+      guid:
+        type: "string"
+        description: "user GUID"
+      directoryLocation:
+        type: "string"
+        description: "user fiem directory location"
+      profileImageData:
+        type: "string"
+        description: "user profile image data"
+  UserLoginModel:
+    type: "object"
+    properties:
+      password:
+        type: "string"
+        description: "user password"
+      username:
+        type: "string"
+        description: "user user name"
+  TextIdModel:
+    type: "object"
+    properties:
+      text:
+        type: "string"
+        description: "Text"
+      id:
+        type: "object"
+        description: "Id of the model"
+  CardCommentModel:
+    type: "object"
+    properties:
+      giftCardId:
+        type: "integer"
+        format: "int32"
+        description: "Id of the giftcard"
+      cardCommentId:
+        type: "integer"
+        format: "int32"
+        description: "Id of the Card comment"
+      commentAddedDate:
+        type: "string"
+        description: "comment added date"
+      commentContent:
+        type: "string"
+        description: "content of the comment"
+      commentOwnerFullName:
+        type: "string"
+        description: "full name of the comment owner"
+      commentOwnerId:
+        type: "integer"
+        format: "int32"
+        description: "Id of the comment owner"
+      commentOwnerImagePath:
+        type: "string"
+        description: "owner image pathe of the comment"
+      likeCount:
+        type: "integer"
+        format: "int32"
+        description: "Like count"
+      currentUserLiked:
+        type: "string"
+        description: "ckeck current user liked to this comment"
+      currentUserOwned:
+        type: "string"
+        description: "Current user owned"
+      Replies:
+        type: "array"
+        description: "List of comment replies of this comment"
+  CommentModel:
+    type: "object"
+    properties:
+      GiftCard:
+        type: "integer"
+        format: "int32"
+        description: "Id of the giftcard"
+      Content:
+        type: "string"
+        description: "content of the comment"
+      Parent:
+        type: "string"
+        description: "Parent of the comment"
+  GiftCardDetailsModel:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int32"
+        description: "Id of the gift card"
+      title: 
+        type: "string"
+        description: "Title"
+      description: 
+        type: "string"
+        description: "Description"
+      issuedCompany:
+        type: "integer"
+        format: "int32"
+        description: "Issued Company"
+      price: 
+        type: "number"
+        description: "Price"
+      owner: 
+        type: "integer"
+        format: "int32"
+        description: "Owner"
+      createdDate:
+        type: "string"
+        description: "Created Date"
+      modifiedDate:
+        type: "string"
+        description: "Giftcard Modified Date"
+      expireDate:
+        type: "string"
+        description: "Expire Date"
+      gUID:
+        type: "string"
+        description: "GUID"
+      directoryLocation:
+        type: "integer"
+        format: "int32"
+        description: "Directory Location"
+      status:
+        type: "integer"
+        format: "int32"
+        description: "Status"
+      type:
+        type: "integer"
+        format: "int32"
+        description: "Type of the card"
+      category:
+        type: "integer"
+        format: "int32"
+        description: "Gift cart category"
+      cardOwner:
+        type: "string"
+        description: "Owner of the gift card"
+      issuedCompanyName:
+        type: "string"
+        description: "Gift card Issued Company Name"
+      categoryName:
+        type: "string"
+        description: "Category Name of the gift card"
+      ownerImage:
+        type: "string"
+        description: "Gift card owner image"
+      likeCount:
+        type: "integer"
+        format: "int32"
+        description: "This Gift cart like count"
+      commentCount:
+        type: "integer"
+        format: "int32"
+        description: "This Gift cart comment count"
